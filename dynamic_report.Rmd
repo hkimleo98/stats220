@@ -1,0 +1,160 @@
+---
+title: My dynamic report
+output: html_fragment
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, error=FALSE)
+
+```
+
+```{css}
+body {
+  background-color: #FEE7D8;
+  padding: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  color:#3e1f25;
+  font-style: oblique;
+  }
+
+p {
+ color:#3e1f25;
+ font-style: oblique;
+}
+
+h2 {
+  font-weight: bold;
+  font-size: 35px
+}
+
+h3 {
+  font-size: 23px
+  font-weight: bold
+}
+```
+
+## Recent alcoholic beverage consumption patterns observed at a restaurant in Auckland
+
+
+The data discussed in this dynamic report is a collection of continuous observational data, logged over time on Google Forms.
+
+The form was designed to help with identifying patterns of alcohol consumption depending on each day, day of the week, and generation.
+
+The data was collected based on first-hand observations as well as observations made upon reading reports made to the surveyor.
+The data was collected over time, and logged together separately.
+
+
+Below are some of the summary values from the data collected,
+as well as plots to aid visualising the data:
+
+\n
+\n
+
+
+```{r}
+
+library(tidyverse)
+
+logged_data <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTzFh1d53cXi4FXccTIkY17Uh46c2NzeDJVnRCsmd3VdWNAWLU9rsblcIdn1TytJWWqWnkiZ75JInbx/pub?gid=2036014978&single=true&output=csv")
+
+
+#Renaming variables for coding
+latest_data <- logged_data[2:6] %>%
+  rename(day_of_week = 1,
+         virgin_drinks = 2,
+         younger_drink = 3,
+         older_drink = 4,
+         nodrink_reason = 5)
+
+glimpse(latest_data)
+
+virgin_drinks_vector = latest_data$virgin_drinks
+
+#Summary stats on raw data
+num_obs <- length(virgin_drinks_vector)
+min_virgin_drinks <- min(virgin_drinks_vector)
+max_virgin_drinks <- max(virgin_drinks_vector)
+mean_virgin_drinks <- mean(virgin_drinks_vector) %>%
+  round(1)
+
+paste("The minimum percentage of non-alcoholic beverages consumed by guests in March was", min_virgin_drinks, "%.")
+
+paste("The maximum percentage of non-alcoholic beverages consumed by guests in March was", max_virgin_drinks, "%.")
+
+paste("The average percentage of non-alcoholic beverages consumed by guests in March was", mean_virgin_drinks, "%.")
+
+
+#Average of non-alcoholic beverage percentages for weekends
+weekend_dates <- c(1,2,7,8,9,14,15,16,21,22,23,28,29,30)
+virgin_drinks_weekend <- virgin_drinks_vector[weekend_dates]
+mean_weekend <- mean(virgin_drinks_weekend) %>%
+  round(1)
+
+paste("The average percentage of non-alcoholic beverages consumed by guests on weekends in March was", mean_weekend, "%.")
+
+#Average of non-alcoholic beverage percentages for weekdays
+virgin_drinks_weekday <- virgin_drinks_vector[c(3,4,5,6,10,11,12,13,17,18,19,20,24,25,26,27,31)]
+mean_weekday <- mean(virgin_drinks_weekday) %>%
+  round(1)
+
+paste("The average percentage of non-alcoholic beverages consumed by guests on weekends in March was", mean_weekday, "%.")
+
+#reordering variable day_of_week to be ordered with the calendar instead of alphabetically.
+latest_data$day_of_week <- factor(latest_data$day_of_week, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+
+
+#Bar charts for dynamic report
+ggplot(data = latest_data) +
+  geom_bar(aes(x = younger_drink)) +
+    labs(title = "Have the majority of younger guests consumed alcohol today?",
+       subtitle = "Younger guests are whom are noted or appear to be younger than 30.")
+
+ggplot(data = latest_data) +
+  geom_bar(aes(x = older_drink)) +
+    labs(title = "Have the majority of older guests consumed alcohol today?",
+       subtitle = "Younger guests are whom are noted or appear to be older than 30.")
+
+ggplot(data = latest_data) +
+  geom_bar(aes(x = nodrink_reason)) +
+    labs(title = "For the people who weren't drinking - what were the perceived reasons?")
+
+#box plots devised for insight on potential interaction between variables
+ggplot(data = latest_data) +
+  geom_boxplot(aes(y = virgin_drinks, x = day_of_week)) +
+    labs(title = "Percentages of beverages non-alcoholic beverages sold",
+         subtitle = "for each days of the week in March")
+
+ggplot(data = latest_data) +
+  geom_boxplot(aes(y = virgin_drinks, x = younger_drink)) +
+      labs(title = "Percentages of non-alcoholic beverages sold",
+      subtitle = "vs whether younger guests were drinking")
+
+
+
+
+```
+\n
+\n
+
+## Inferences
+\n
+\n
+
+We can observe the following from the data above:
+\n
+
+- Majority of younger guests at the restaurant did not consume alcohol for almost half of the days in March
+
+- Majority of older guests at the restaurant consumed alcohol on every day of March.
+
+- For those who did not drink, the primary reason as observed was personal preference.
+
+- During the weekends, the percentages of non-alcoholic beverages sold is notably lower.
+
+- During weekdays, much more non-alcoholic beverages are sold. However, it appears to fluctuate on each given day.
+
+
+
+
+
